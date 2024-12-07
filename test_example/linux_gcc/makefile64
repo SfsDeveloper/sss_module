@@ -1,0 +1,40 @@
+PROGRAM = test_sss
+
+DIR_COMMON = ../common/
+DIR_LIB_HEADER = ../../lib/include
+DIR_LIB_BIN = ../../lib/linux/x64
+
+DIR_PLATFORM = ./x64/
+DIR_OBJ = $(DIR_PLATFORM)obj/
+DIR_BIN = $(DIR_PLATFORM)bin/
+
+SRCS = main.c cpuinfo.c
+OBJS = $(SRCS:%.c=$(DIR_OBJ)%.o)
+BIN = $(DIR_BIN)$(PROGRAM)
+
+CC = gcc
+CFLAGS = -Wall -Werror -Wextra -m64 -O2 -DNDEBUG -I . -I $(DIR_COMMON) -I $(DIR_LIB_HEADER)
+
+all : $(DIR_PLATFORM) $(DIR_OBJ) $(DIR_BIN) $(BIN)
+
+$(DIR_PLATFORM) :
+	mkdir -p $(DIR_PLATFORM)
+
+$(DIR_OBJ) :
+	mkdir -p $(DIR_OBJ)
+
+$(DIR_BIN) :
+	mkdir -p $(DIR_BIN)
+	cp $(DIR_LIB_BIN)/*.so $(DIR_BIN)
+
+$(BIN) : $(OBJS)
+	$(CC) $(CFLAGS) -L$(DIR_LIB_BIN) -Wl,-rpath=. -o $@ $^ -lslbsss
+
+$(DIR_OBJ)main.o : $(DIR_COMMON)main.c $(DIR_COMMON)main.h $(DIR_COMMON)cpuinfo.h
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+$(DIR_OBJ)cpuinfo.o : $(DIR_COMMON)cpuinfo.c $(DIR_COMMON)cpuinfo.h
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+clean :
+	rm -rf $(DIR_PLATFORM)
