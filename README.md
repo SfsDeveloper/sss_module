@@ -1,7 +1,7 @@
 # sss_module
 (k, n) threshold secret sharing scheme library.<br>
 
-# About libslbss
+# About libslbsss
 It is a library that can be used with clang / gcc on Linux and Visual Studio on Windows (R).<br>
 Supports x64 and x86 processor architectures.<br>
 <br>
