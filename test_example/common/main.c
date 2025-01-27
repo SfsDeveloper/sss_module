@@ -21,7 +21,7 @@
 #	include <unistd.h>
 #	include <sys/syscall.h>
 #	define TID_T		pid_t
-#	define GetCurrentThreadId()		syscall(SYS_gettid)
+#	define GetCurrentThreadId()		(TID_T)syscall(SYS_gettid)
 #	define InterlockedIncrement(p)	__atomic_add_fetch(p, 1, __ATOMIC_RELAXED)
 #	define InterlockedDecrement(p)	__atomic_sub_fetch(p, 1, __ATOMIC_RELAXED)
 #endif
@@ -189,8 +189,8 @@ void sss_example_sub(
 	slb_bool_t bAVX512 = (simd_flags & F_AVX512) && IsSimdAvailableAVX512();
 
 	/* Allocate resources */
-	slb_uint16_t*const plain = slb_alloc( &g_mem_callback_param, sizeof(slb_uint16_t) * plainsize );
-	STREAM_BUFF*const stream = slb_alloc( &g_mem_callback_param, sizeof(STREAM_BUFF) * n );
+	slb_uint16_t*const plain = slb_alloc( &g_mem_callback_param, sizeof(slb_uint16_t) * (slb_uint_t)plainsize );
+	STREAM_BUFF*const stream = slb_alloc( &g_mem_callback_param, sizeof(STREAM_BUFF) * (slb_uint_t)n );
 
 	for (i = 0; i < n; ++i) {
 		stream[i].data = g_stream_mem[i];
@@ -277,7 +277,7 @@ void sss_example_sub(
 	}
 
 	/* Store random values in plain data */
-	rc = slb_sss_rand(hEncode, plainsize, plain);
+	rc = slb_sss_rand(hEncode, (slb_uint_t)plainsize, plain);
 	printf_detail("slb_sss_rand: rc=0x%04x\n", rc);
 	ASSERT( SLB_R_SUCCEEDED(rc) );
 
@@ -331,7 +331,7 @@ void sss_example_encode(
 {
 	SLB_RC rc;
 	SLB_SSS_HANDLE_STATE hstate;
-	slb_uint16_t*const x = slb_alloc( &g_mem_callback_param, sizeof(slb_uint16_t) * n );
+	slb_uint16_t*const x = slb_alloc( &g_mem_callback_param, sizeof(slb_uint16_t) * (slb_uint_t)n );
 	slb_int_t i;
 	slb_int_t offset;
 	slb_int_t best_nmb;
@@ -339,7 +339,7 @@ void sss_example_encode(
 	int elapsed;
 
 	/* Allocate resources */
-	slb_uint32_t**const share = slb_alloc( &g_mem_callback_param, sizeof(slb_uint32_t**) * n );
+	slb_uint32_t**const share = slb_alloc( &g_mem_callback_param, sizeof(slb_uint32_t**) * (slb_uint_t)n );
 	for (i = 0; i < n; ++i) {
 		share[i] = slb_alloc( &g_mem_callback_param, sizeof(slb_uint32_t) * CODING_MAX_CHUNK );
 	}
@@ -350,7 +350,7 @@ void sss_example_encode(
 	}
 
 	/* Start encoding */
-	rc = slb_sss_start_encode(hEncode, cur_k, n, random_x, x);
+	rc = slb_sss_start_encode(hEncode, (slb_uint_t)cur_k, (slb_uint_t)n, random_x, x);
 	hstate = slb_sss_get_handle_state(hEncode);
 	printf_detail("slb_sss_start_encode: rc=0x%04x hstate=%d\n", rc, hstate);
 	ASSERT( SLB_R_SUCCEEDED(rc) );
@@ -441,7 +441,7 @@ void sss_example_decode(
 {
 	SLB_RC rc;
 	SLB_SSS_HANDLE_STATE hstate;
-	slb_uint16_t*const x = slb_alloc( &g_mem_callback_param, sizeof(slb_uint16_t) * n );
+	slb_uint16_t*const x = slb_alloc( &g_mem_callback_param, sizeof(slb_uint16_t) * (slb_uint_t)n );
 	slb_int_t i;
 	slb_int_t offset;
 	slb_int_t best_nmb;
@@ -449,14 +449,14 @@ void sss_example_decode(
 	int elapsed;
 
 	/* Allocate resources */
-	slb_uint16_t*const plain2 = slb_alloc( &g_mem_callback_param, sizeof(slb_uint16_t) * plainsize );
-	slb_uint32_t**const share = slb_alloc( &g_mem_callback_param, sizeof(slb_uint32_t**) * n );
+	slb_uint16_t*const plain2 = slb_alloc( &g_mem_callback_param, sizeof(slb_uint16_t) * (slb_uint_t)plainsize );
+	slb_uint32_t**const share = slb_alloc( &g_mem_callback_param, sizeof(slb_uint32_t**) * (slb_uint_t)n );
 
 	for (i = 0; i < n; ++i) {
 		share[i] = slb_alloc( &g_mem_callback_param, sizeof(slb_uint32_t) * CODING_MAX_CHUNK );
 	}
 
-	memset(plain2, 0, plainsize * sizeof(slb_uint16_t));
+	memset(plain2, 0, (slb_uint_t)plainsize * sizeof(slb_uint16_t));
 
 	/* Copy stream-x to x */
 	for (i = 0; i < n; ++i) {
@@ -464,7 +464,7 @@ void sss_example_decode(
 	}
 
 	/* Start decoding */
-	rc = slb_sss_start_decode(hDecode, cur_k, x);
+	rc = slb_sss_start_decode(hDecode, (slb_uint_t)cur_k, x);
 	hstate = slb_sss_get_handle_state(hDecode);
 	printf_detail("slb_sss_start_decode: rc=0x%04x hstate=%d\n", rc, hstate);
 	ASSERT( SLB_R_SUCCEEDED(rc) );
@@ -525,7 +525,7 @@ void sss_example_decode(
 
 	/* Compare plain data */
 	if (plain_match) {
-		if ( memcmp(plain, plain2, sizeof(slb_uint16_t) * plainsize) == 0 ) {
+		if ( memcmp(plain, plain2, sizeof(slb_uint16_t) * (slb_uint_t)plainsize) == 0 ) {
 			printf_detail("plain data matched.\n");
 		}
 		else {
@@ -534,7 +534,7 @@ void sss_example_decode(
 		}
 	}
 	else {
-		if ( memcmp(plain, plain2, sizeof(slb_uint16_t) * plainsize) == 0 ) {
+		if ( memcmp(plain, plain2, sizeof(slb_uint16_t) * (slb_uint_t)plainsize) == 0 ) {
 			printf_detail("!!! plain data matched !!!\n");
 			ASSERT(SLB_FALSE);
 		}
@@ -719,7 +719,7 @@ void check_info(H_SLB_SSS handle, slb_int_t k, slb_int_t n, slb_int_t index, slb
 		ASSERT(SLB_FALSE);
 	}
 
-	info_x = slb_sss_get_info_x( handle, index );
+	info_x = slb_sss_get_info_x( handle, (slb_uint_t)index );
 	if ( info_x != xval ) {
 		printf("!!! unexpected x\n");
 		ASSERT(SLB_FALSE);

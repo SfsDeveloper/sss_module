@@ -13,7 +13,7 @@ OBJS = $(SRCS:%.c=$(DIR_OBJ)%.o)
 BIN = $(DIR_BIN)$(PROGRAM)
 
 CC = clang
-CFLAGS = -Wall -Werror -Wextra -m64 -O2 -DNDEBUG -I . -I $(DIR_COMMON) -I $(DIR_LIB_HEADER)
+CFLAGS = -Wall -Werror -Wextra -Wconversion -m64 -O2 -DNDEBUG -I . -I $(DIR_COMMON) -I $(DIR_LIB_HEADER)
 
 all : $(DIR_PLATFORM) $(DIR_OBJ) $(DIR_BIN) $(BIN)
 
